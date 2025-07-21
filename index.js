@@ -1,14 +1,19 @@
 #!/usr/bin/env node
 
+/**
+ * Simple CLI that asks the A2A Weather Assistant about the weather in a city.
+ * It showcases how to perform a blocking request using the A2A SDK.
+ */
+
 import fetch from "node-fetch";
-import { A2AClient } from "@a2a-js/sdk/client";
-import { v4 as uuidv4 } from "uuid";
+import {A2AClient} from "@a2a-js/sdk/client";
+import {v4 as uuidv4} from "uuid";
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────────
 const API_KEY = process.env.A2A_API_KEY;
 const AGENT_BASE_URL = process.env.A2A_AGENT_URL;
 
-// inject API key into every fetch
+// Monkey‑patch global `fetch` so the API key is automatically included
 const originalFetch = fetch;
 globalThis.fetch = async (url, options = {}) => {
     const headers = {
@@ -19,6 +24,14 @@ globalThis.fetch = async (url, options = {}) => {
 };
 // ── END CONFIG ──────────────────────────────────────────────────────────────────
 
+/**
+ * Polls the given task until it completes.
+ *
+ * @param {A2AClient} client      A2A client instance
+ * @param {string}     taskId      Identifier of the task to poll
+ * @param {number}     intervalMs  Polling interval in milliseconds
+ * @returns {Promise<object>}      The completed task object
+ */
 async function waitForTaskResult(client, taskId, intervalMs = 10000) {
     while (true) {
         const { result, error } = await client.getTask({ id: taskId, historyLength: 100 });
@@ -34,6 +47,10 @@ async function waitForTaskResult(client, taskId, intervalMs = 10000) {
     }
 }
 
+/**
+ * Entry point for the CLI.
+ * Reads the city name from the command line and prints the agent's reply.
+ */
 async function main() {
     const city = process.argv[2];
     if (!city) {
@@ -44,7 +61,7 @@ async function main() {
     const client = new A2AClient(AGENT_BASE_URL);
     const messageId = uuidv4();
 
-    // send the initial message
+    // Prepare the message to send to the agent
     const sendParams = {
         message: {
             messageId,
@@ -76,7 +93,7 @@ async function main() {
         console.log("🛠  Task created, polling for result…");
         const task = await waitForTaskResult(client, result.id);
 
-        // final reply is last history entry
+        // The final agent reply is the last entry in the task history
         const last = task.history[task.history.length - 1];
         console.log(
             "🌤  Agent says:",

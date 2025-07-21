@@ -1,11 +1,16 @@
 # A2A Weather Agent Client
 
-A simple Node.js client that uses [@a2a-js/sdk](https://github.com/a2aproject/a2a-js) to query the Weather Assistant agent.
+A small Node.js example that queries the Weather Assistant agent using
+the [@a2a-js/sdk](https://github.com/a2aproject/a2a-js). Two scripts are
+included:
+
+- **`index.js`** – performs a blocking request and prints the final result.
+- **`stream.js`** – streams partial responses as they are produced by the agent.
 
 ## Prerequisites
 
-- Node.js ≥ 18 (for built-in `fetch`, or you can install `node-fetch`)
-- an API key (if your agent enforces one)
+- Node.js **18 or later** (for built‑in `fetch`; older versions need a polyfill)
+- An API key if your agent requires one
 
 ## Setup
 
@@ -14,18 +19,18 @@ A simple Node.js client that uses [@a2a-js/sdk](https://github.com/a2aproject/a2
    ```bash
    git clone <this-repo-url>
    cd a2a-weather-client
-   npm install @a2a-js/sdk node-fetch undici uuid
    npm install
-    ```
+   ```
 
 2. **Configure**
 
-    * (Optional) If your agent requires an API key, export it:
+   * Export your API key:
 
       ```bash
       export A2A_API_KEY="your_key_here"
       ```
-    * If you’ve deployed your agent under a different URL, set:
+
+   * Set the agent's base URL:
 
       ```bash
       export A2A_AGENT_URL="http://your-host/gateway/a2a/weather-agent/1"
@@ -34,11 +39,11 @@ A simple Node.js client that uses [@a2a-js/sdk](https://github.com/a2aproject/a2
 3. **Run**
 
    ```bash
-   # Query for London:
-   npm start -- "London"
+   # Query for London in blocking mode
+   npm start -- "London"       # or: node index.js "London"
 
-   # Or directly:
-   node index.js "Tokyo"
+   # Stream the response instead
+   node stream.js "Tokyo"
    ```
 
 You should see output like:
